@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Add a New Program</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:        #212331;
+  --blue:        #6976e7;
+  --blue-dark:   #2f3886;
+  --blue-light:  #b4baf3;
+  --blue-bg:     #e1e3fa;
+  --blue-alt:    #8e98ed;
+  --text:        #55597c;
+  --muted:       #8d90a7;
+  --border:      #cbcde1;
+  --border-lt:   #e1e3fa;
+  --orange:      #ffca7f;
+  --danger:      #bf2540;
+  --section-bg:  #f8f9fe;
+  --white:       #ffffff;
+}
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: #f2f2f2;
+  min-height: 100vh;
+}
+
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(28,34,80,0.5);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 40px 20px 48px;
+  overflow-y: auto; z-index: 1000;
+}
+
+.modal {
+  background: var(--white);
+  border-radius: 16px;
+  width: 100%; max-width: 860px;
+  box-shadow: 0 12px 48px rgba(28,34,80,0.2);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+
+.modal-title {
+  font-size: 24px; font-weight: 800;
+  color: var(--navy); padding: 34px 32px 0;
+  letter-spacing: -0.4px;
+}
+
+.modal-body { padding: 4px 32px 34px; }
+
+.modal-footer {
+  padding: 20px 32px;
+  border-top: 1.5px solid var(--border-lt);
+  display: flex; justify-content: flex-end; gap: 12px;
+  background: var(--white);
+}
+
+.section-title {
+  font-size: 17px; font-weight: 700;
+  color: var(--navy); margin: 30px 0 20px;
+  letter-spacing: -0.2px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-step {
+  font-size: 11px; font-weight: 600;
+  color: #b8864a; letter-spacing: 0.02em;
+  background: #fdf3e3;
+  border: 1.5px solid #f0c98a;
+  border-radius: 20px; padding: 2px 10px;
+  white-space: nowrap;
+}
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 20px; }
+.form-row.full { grid-template-columns: 1fr; }
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+
+.form-label {
+  font-size: 13px; font-weight: 600; color: var(--navy);
+  display: flex; align-items: center; gap: 6px;
+}
+
+.info-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #b0b4c4; color: #fff;
+  font-size: 9px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; position: relative; font-style: normal;
+  user-select: none;
+}
+.info-dot::after {
+  content: attr(data-tip);
+  position: absolute; bottom: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%);
+  background: var(--navy); color: #e8eaf5;
+  font-size: 12px; font-weight: 400; line-height: 1.55;
+  padding: 8px 12px; border-radius: 8px;
+  white-space: normal; width: 230px; text-align: left;
+  pointer-events: none; opacity: 0; transition: opacity 0.15s;
+  z-index: 9999; box-shadow: 0 4px 16px rgba(28,34,80,0.2);
+}
+.info-dot::before {
+  content: ''; position: absolute;
+  bottom: calc(100% + 3px); left: 50%; transform: translateX(-50%);
+  border: 5px solid transparent; border-top-color: var(--navy);
+  opacity: 0; transition: opacity 0.15s; pointer-events: none; z-index: 9999;
+}
+.info-dot:hover::after, .info-dot:hover::before,
+.info-dot.active::after, .info-dot.active::before { opacity: 1; }
+
+.form-input, .form-select {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 11px 14px; font-size: 14px; font-family: 'Inter', sans-serif;
+  color: var(--navy); outline: none; background: var(--white);
+  appearance: none; -webkit-appearance: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.form-input:focus, .form-select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(105,118,231,0.13);
+}
+.form-input::placeholder { color: var(--muted); font-weight: 300; }
+
+.select-wrap { position: relative; }
+.select-wrap::after {
+  content: "▾"; position: absolute; right: 14px; top: 50%;
+  transform: translateY(-50%); color: var(--muted); pointer-events: none; font-size: 12px;
+}
+.form-select { padding-right: 36px; cursor: pointer; }
+
+.radio-group { display: flex; gap: 22px; align-items: center; padding-top: 4px; }
+.radio-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; cursor: pointer; color: var(--text); font-weight: 400;
+}
+.radio-label input[type="radio"] { width: 17px; height: 17px; accent-color: var(--orange); cursor: pointer; }
+
+.scan-seconds-wrap { position: relative; margin-top: 10px; }
+.scan-seconds-wrap input {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 11px 72px 11px 14px; font-size: 14px; font-family: 'Inter', sans-serif;
+  color: var(--navy); outline: none; transition: border-color 0.15s;
+}
+.scan-seconds-wrap input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(105,118,231,0.13); }
+.scan-unit {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--muted); font-size: 13px; pointer-events: none;
+}
+
+hr.divider { border: none; border-top: 1.5px solid var(--border-lt); margin: 28px 0; }
+
+.color-wrap {
+  display: flex; align-items: center; border: 1.5px solid var(--border);
+  border-radius: 10px; overflow: hidden; transition: border-color 0.15s;
+}
+.color-wrap:focus-within { border-color: var(--blue); }
+.color-wrap input[type="text"] {
+  flex: 1; border: none; outline: none; padding: 11px 14px;
+  font-size: 14px; font-family: 'Inter', sans-serif; color: var(--navy);
+}
+.color-swatch { width: 42px; height: 42px; background: #000; border-left: 1.5px solid var(--border); cursor: pointer; flex-shrink: 0; }
+.color-swatch.grey { background: #aaa; }
+
+.eye-label {
+  font-size: 13px; font-weight: 500; color: var(--muted);
+  display: flex; align-items: center; gap: 6px; margin-bottom: 7px;
+}
+.eye-label input[type="checkbox"] { accent-color: var(--blue); }
+.color-wrap.disabled { opacity: 0.45; pointer-events: none; background: var(--section-bg); }
+
+.upload-img-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 10px 18px; font-size: 13px; font-family: 'Inter', sans-serif;
+  background: var(--white); cursor: pointer; color: var(--text); font-weight: 500;
+  transition: border-color 0.15s, background 0.15s;
+}
+.upload-img-btn:hover { background: var(--section-bg); border-color: var(--blue-alt); }
+
+.editor-box {
+  border: 1.5px solid var(--border); border-radius: 12px;
+  padding: 22px; margin-top: 10px; background: var(--section-bg);
+}
+.editor-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 18px; }
+
+.asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 4px; }
+
+.asset-card {
+  border: 1.5px solid var(--border); border-radius: 12px;
+  padding: 18px; background: var(--white);
+}
+.asset-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2px; }
+.asset-card-title { font-size: 15px; font-weight: 800; color: var(--navy); padding-right: 8px; letter-spacing: -0.2px; }
+.asset-card-edit {
+  font-size: 12px; color: var(--blue); background: none; border: none;
+  cursor: pointer; padding: 0; font-weight: 500; font-family: 'Inter', sans-serif;
+  margin-bottom: 12px; display: inline-block;
+}
+.asset-card-edit:hover { text-decoration: underline; }
+.asset-card-divider { border: none; border-top: 1.5px solid var(--border-lt); margin: 6px 0 14px; }
+.asset-delete {
+  background: none; border: none; cursor: pointer;
+  color: var(--danger); line-height: 1; padding: 2px; flex-shrink: 0; opacity: 0.85;
+}
+.asset-delete:hover { opacity: 1; }
+
+.asset-label {
+  font-size: 12px; font-weight: 600; color: var(--navy);
+  display: flex; align-items: center; gap: 4px; margin-bottom: 5px;
+}
+.optional-text { color: var(--muted); font-weight: 400; }
+.asset-input {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 9px 12px; font-size: 13px; font-family: 'Inter', sans-serif;
+  color: var(--navy); outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.asset-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(105,118,231,0.13); }
+.asset-input::placeholder { color: var(--muted); font-weight: 300; }
+
+.asset-field { margin-bottom: 14px; }
+.asset-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+
+.upload-asset-btn {
+  width: 100%; padding: 12px; border: 1.5px solid #ABAFCE; border-radius: 10px;
+  background: #F5F6FF; color: #212331;
+  font-size: 13px; font-weight: 700; font-family: 'Inter', sans-serif;
+  cursor: pointer; text-align: center; margin-top: 2px;
+  transition: background 0.15s; letter-spacing: 0.01em;
+}
+.upload-asset-btn-inline {
+  width: auto; padding: 11px 20px; border: 1.5px solid #ABAFCE; border-radius: 10px;
+  background: #F5F6FF; color: #212331;
+  font-size: 13px; font-weight: 700; font-family: 'Inter', sans-serif;
+  cursor: pointer; text-align: center; margin-top: 2px;
+  transition: background 0.15s; letter-spacing: 0.01em;
+  display: inline-block;
+}
+.upload-asset-btn:hover { background: #e0e2f5; border-color: #8c91c0; }
+.upload-asset-btn-inline:hover { background: #e0e2f5; border-color: #8c91c0; }
+.upload-asset-btn .opt { font-weight: 400; opacity: 0.85; }
+.upload-asset-btn-inline .opt { font-weight: 400; opacity: 0.85; }
+.upload-asset-btn .opt { font-weight: 400; opacity: 0.85; }
+
+.photo-preview {
+  width: 100%; height: 72px; background: var(--section-bg); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; margin-bottom: 8px; border: 1.5px solid var(--border-lt);
+}
+.photo-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
+
+.file-tag { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text); margin-bottom: 8px; }
+.file-remove { color: var(--danger); background: none; border: none; cursor: pointer; font-size: 12px; text-decoration: underline; padding: 0; font-family: 'Inter', sans-serif; }
+
+.add-asset-cell {
+  border: 2px dashed var(--border); border-radius: 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 140px; cursor: pointer; position: relative;
+  transition: border-color 0.15s, background 0.15s;
+}
+.add-asset-cell:hover { border-color: var(--blue); background: rgba(105,118,231,0.03); }
+.add-icon {
+  width: 44px; height: 44px; border-radius: 50%; background: var(--blue);
+  color: #fff; font-size: 28px; display: flex; align-items: center; justify-content: center;
+  margin-bottom: 8px; line-height: 1; user-select: none; transition: background 0.15s;
+}
+.add-asset-cell:hover .add-icon { background: var(--blue-dark); }
+.add-label { font-size: 13px; color: var(--navy); font-weight: 600; }
+
+.asset-dropdown {
+  position: absolute; bottom: calc(100% + 8px); left: 0; right: 0;
+  background: var(--white); border: 1.5px solid var(--border); border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(28,34,80,0.14); z-index: 300; overflow: hidden;
+}
+.asset-dropdown-inner { padding: 10px; }
+.asset-dd-label { font-size: 10px; color: var(--muted); font-weight: 700; padding: 4px 10px 8px; text-transform: uppercase; letter-spacing: 0.07em; }
+.asset-dd-item {
+  display: flex; align-items: center; padding: 10px 12px; border-radius: 8px;
+  cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text);
+  user-select: none; transition: background 0.1s, color 0.1s;
+}
+.asset-dd-item:hover { background: var(--blue-bg); color: var(--navy); }
+.asset-dd-item-qty { justify-content: space-between; cursor: default; padding: 8px 12px; }
+.asset-dd-item-name { flex: 1; cursor: pointer; }
+.asset-dd-qty-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.asset-dd-qty-input {
+  width: 46px; border: 1.5px solid var(--border); border-radius: 6px;
+  padding: 5px 6px; font-size: 13px; text-align: center;
+  font-family: 'Inter', sans-serif; color: var(--navy); outline: none;
+}
+.asset-dd-qty-input:focus { border-color: var(--blue); }
+.asset-dd-qty-add {
+  padding: 5px 12px; border: none; border-radius: 6px;
+  background: var(--blue); color: #fff; font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: 'Inter', sans-serif;
+}
+.asset-dd-qty-add:hover { background: var(--blue-dark); }
+.asset-dd-divider { border: none; border-top: 1px solid var(--border-lt); margin: 6px 0; }
+.asset-dd-custom-wrap { padding: 4px 2px 2px; }
+.asset-dd-custom-input {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 9px 12px; font-size: 13px; margin: 4px 0; outline: none;
+  color: var(--navy); font-family: 'Inter', sans-serif; transition: border-color 0.15s;
+}
+.asset-dd-custom-input:focus { border-color: var(--blue); }
+.asset-dd-custom-add {
+  width: 100%; padding: 9px; border: none; border-radius: 8px;
+  background: var(--blue); color: #fff; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.15s;
+}
+.asset-dd-custom-add:hover { background: var(--blue-dark); }
+
+.edit-type-overlay {
+  position: fixed; inset: 0; background: rgba(28,34,80,0.45);
+  display: flex; align-items: center; justify-content: center; z-index: 2000;
+}
+.edit-type-modal {
+  background: var(--white); border-radius: 14px; padding: 26px; width: 360px;
+  box-shadow: 0 12px 48px rgba(28,34,80,0.2);
+}
+.edit-type-title { font-size: 15px; font-weight: 800; color: var(--navy); margin-bottom: 16px; letter-spacing: -0.2px; }
+.edit-type-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
+.edit-type-option {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px;
+  cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text);
+  border: 1.5px solid transparent; transition: background 0.1s;
+}
+.edit-type-option:hover { background: var(--blue-bg); }
+.edit-type-option.selected { border-color: var(--blue); background: var(--blue-bg); color: var(--navy); font-weight: 600; }
+.edit-type-option input[type="radio"] { accent-color: var(--blue); width: 15px; height: 15px; }
+.edit-type-divider { border: none; border-top: 1px solid var(--border-lt); margin: 8px 0; }
+.edit-type-custom-input {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 9px 12px; font-size: 13px; outline: none; color: var(--navy); margin-top: 6px; font-family: 'Inter', sans-serif;
+}
+.edit-type-custom-input:focus { border-color: var(--blue); }
+.edit-type-actions { display: flex; gap: 10px; justify-content: flex-end; }
+.edit-type-cancel {
+  padding: 9px 20px; border: 1.5px solid var(--border); border-radius: 8px;
+  background: var(--white); color: var(--text); font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.15s;
+}
+.edit-type-cancel:hover { background: var(--section-bg); }
+.edit-type-save {
+  padding: 9px 20px; border: none; border-radius: 8px;
+  background: var(--blue); color: #fff; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.15s;
+}
+.edit-type-save:hover { background: var(--blue-dark); }
+
+.btn-close {
+  padding: 11px 22px; border: 1.5px solid var(--danger); border-radius: 10px;
+  background: var(--white); color: var(--danger); font-size: 14px; font-weight: 600;
+  font-family: 'Inter', sans-serif; cursor: pointer; transition: background 0.15s;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.btn-close:hover { background: #fdf0f2; }
+.btn-preview {
+  padding: 11px 22px; border: 1.5px solid var(--blue); border-radius: 10px;
+  background: var(--white); color: var(--blue); font-size: 14px; font-weight: 600;
+  font-family: 'Inter', sans-serif; cursor: pointer; transition: background 0.15s;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.btn-preview:hover { background: var(--blue-bg); }
+.btn-confirm {
+  padding: 11px 22px; border: 1.5px solid #4caf50; border-radius: 10px;
+  background: #4caf50; color: #fff; font-size: 14px; font-weight: 600;
+  font-family: 'Inter', sans-serif; cursor: pointer; transition: background 0.15s;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.btn-confirm:hover { background: #388e3c; border-color: #388e3c; }
+
+/* ── Custom select dropdowns (shared) ── */
+.custom-select-wrap { position: relative; }
+.custom-select-trigger {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 11px 14px; font-size: 14px; font-family: 'Inter', sans-serif;
+  color: var(--navy); outline: none; background: var(--white);
+  cursor: pointer; text-align: left; display: flex; align-items: center;
+  justify-content: space-between; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.custom-select-trigger:focus, .custom-select-trigger.open {
+  border-color: var(--blue); box-shadow: 0 0 0 3px rgba(105,118,231,0.13);
+}
+.custom-select-trigger-text { font-weight: 400; color: var(--navy); }
+.custom-select-chevron { color: var(--muted); font-size: 12px; flex-shrink: 0; margin-left: 8px; }
+.custom-select-dropdown {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+  background: var(--white); border: 1.5px solid var(--border); border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(28,34,80,0.13); z-index: 500; overflow: hidden;
+  display: none;
+}
+.custom-select-dropdown.open { display: block; }
+.custom-select-dropdown-inner { padding: 8px; }
+.custom-select-option {
+  padding: 10px 12px; border-radius: 8px; cursor: pointer;
+  font-size: 13px; font-weight: 500; color: var(--text);
+  transition: background 0.1s; user-select: none;
+}
+.custom-select-option:hover { background: var(--blue-bg); color: var(--navy); }
+.custom-select-option.selected { background: var(--blue-bg); color: var(--navy); font-weight: 600; }
+/* ── Date + Retail Location two-column layout with divider ── */
+.date-retail-layout {
+  display: flex;
+  gap: 0;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+.date-retail-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-right: 24px;
+  border-right: 1.5px solid var(--border-lt);
+}
+.date-retail-divider { display: none; }
+.date-retail-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-left: 24px;
+}
+#locationSection {
+  margin-top: 44px;
+}
+
+.location-dropdown-wrap { position: relative; }
+.location-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.location-trigger {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 11px 14px; font-size: 14px; font-family: 'Inter', sans-serif;
+  color: var(--navy); outline: none; background: var(--white);
+  cursor: pointer; text-align: left; display: flex; align-items: center;
+  justify-content: space-between; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.location-trigger:focus, .location-trigger.open {
+  border-color: var(--blue); box-shadow: 0 0 0 3px rgba(105,118,231,0.13);
+}
+.location-trigger-text { color: var(--muted); font-weight: 300; }
+.location-trigger-text.has-value { color: var(--navy); font-weight: 400; }
+.location-trigger-chevron { color: var(--muted); font-size: 12px; flex-shrink: 0; margin-left: 8px; }
+.location-dropdown {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+  background: var(--white); border: 1.5px solid var(--border); border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(28,34,80,0.13); z-index: 500; overflow: hidden;
+}
+.location-dropdown-inner { padding: 8px; }
+.location-dd-label { font-size: 10px; color: var(--muted); font-weight: 700; padding: 4px 10px 8px; text-transform: uppercase; letter-spacing: 0.07em; }
+.location-dd-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 8px; cursor: pointer;
+  font-size: 13px; font-weight: 500; color: var(--text);
+  transition: background 0.1s; user-select: none;
+}
+.location-dd-item:hover { background: var(--blue-bg); color: var(--navy); }
+.location-dd-item.selected { background: var(--blue-bg); color: var(--navy); }
+.location-dd-item input[type="checkbox"] { accent-color: var(--blue); width: 15px; height: 15px; flex-shrink: 0; pointer-events: none; }
+.location-dd-divider { border: none; border-top: 1px solid var(--border-lt); margin: 6px 0; }
+.location-dd-custom-wrap { padding: 4px 4px 4px; display: flex; gap: 8px; }
+.location-dd-custom-input {
+  flex: 1; border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 8px 12px; font-size: 13px; outline: none; color: var(--navy);
+  font-family: 'Inter', sans-serif; transition: border-color 0.15s;
+}
+.location-dd-custom-input:focus { border-color: var(--blue); }
+.location-dd-custom-add {
+  padding: 8px 14px; border: none; border-radius: 8px;
+  background: var(--blue); color: #fff; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap;
+  transition: background 0.15s;
+}
+.location-dd-custom-add:hover { background: var(--blue-dark); }
+.location-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.location-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--blue-bg); color: var(--navy);
+  border-radius: 6px; padding: 4px 10px 4px 10px;
+  font-size: 12px; font-weight: 500;
+}
+.location-tag-remove {
+  background: none; border: none; cursor: pointer; color: var(--blue);
+  font-size: 14px; line-height: 1; padding: 0; margin-left: 2px;
+  display: flex; align-items: center;
+}
+.location-tag-remove:hover { color: var(--danger); }
+
+/* ── Code Details new layout ── */
+.code-details-top {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0;
+  align-items: stretch;
+}
+.code-details-divider {
+  display: none;
+}
+.code-details-left {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-right: 24px;
+}
+.code-preview-panel {
+  border: 1.5px solid var(--border-lt);
+  border-radius: 14px;
+  background: var(--section-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 16px;
+  margin-left: 24px;
+  align-self: stretch;
+  position: relative;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+}
+/* Vertical divider line — centred: 24px from each side */
+.code-preview-panel::before {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--border-lt);
+}
+.code-preview-qr { display: none; }
+.code-preview-label {
+  font-size: 13px; color: var(--text); font-weight: 500; text-align: center;
+}
+/* Editor sits BELOW the two-column top, full width */
+.code-editor-full {
+  margin-top: 20px;
+}
+
+/* ── Per-asset radio question ── */
+.per-asset-question {
+  font-size: 13px; font-weight: 600; color: var(--navy);
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 12px; line-height: 1.5;
+}
+.per-asset-radio-group { display: flex; flex-direction: column; gap: 10px; }
+.per-asset-radio-label {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 13px; font-weight: 400; color: var(--text); cursor: pointer;
+}
+.per-asset-radio-label input[type="radio"] { accent-color: var(--orange); width: 16px; height: 16px; }
+
+/* ── Select Custom TapScan Code sub-row ── */
+.code-sub-row { display: flex; flex-direction: column; gap: 20px; }
+
+/* ── Save TapScan Code button ── */
+.save-tapscan-btn {
+  display: flex; justify-content: flex-end; margin-top: 20px;
+}
+.save-tapscan-btn button {
+  padding: 12px 28px; border: none; border-radius: 10px;
+  background: #4caf50; color: #fff;
+  font-size: 14px; font-weight: 700; font-family: 'Inter', sans-serif;
+  cursor: pointer; transition: background 0.15s; letter-spacing: 0.01em;
+}
+.save-tapscan-btn button:hover { background: #388e3c; }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-title">Add a New Program</div>
+    <div class="modal-body">
+
+      <div class="section-title">Campaign Details <span class="section-step">Step 1 of 4</span></div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Client Name <span class="info-dot" data-tip="Select the client associated with this campaign.">i</span></label>
+          <div class="custom-select-wrap" id="wrap_clientName">
+            <button type="button" class="custom-select-trigger" onclick="toggleCustomSelect('clientName')">
+              <span class="custom-select-trigger-text" id="val_clientName">Client Name</span>
+              <span class="custom-select-chevron">▾</span>
+            </button>
+            <div class="custom-select-dropdown" id="dd_clientName">
+              <div class="custom-select-dropdown-inner">
+                <div class="custom-select-option" onclick="selectCustomOption('clientName','Client Name','Client Name')">Client Name</div>
+                <div class="custom-select-option" onclick="selectCustomOption('clientName','Acme Corp','Acme Corp')">Acme Corp</div>
+                <div class="custom-select-option" onclick="selectCustomOption('clientName','Globex','Globex')">Globex</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Client Brand <span class="info-dot" data-tip="Select the brand under this client that the campaign belongs to.">i</span></label>
+          <div class="custom-select-wrap" id="wrap_clientBrand">
+            <button type="button" class="custom-select-trigger" onclick="toggleCustomSelect('clientBrand')">
+              <span class="custom-select-trigger-text" id="val_clientBrand">Client Brand</span>
+              <span class="custom-select-chevron">▾</span>
+            </button>
+            <div class="custom-select-dropdown" id="dd_clientBrand">
+              <div class="custom-select-dropdown-inner">
+                <div class="custom-select-option" onclick="selectCustomOption('clientBrand','Client Brand','Client Brand')">Client Brand</div>
+                <div class="custom-select-option" onclick="selectCustomOption('clientBrand','Brand Alpha','Brand Alpha')">Brand Alpha</div>
+                <div class="custom-select-option" onclick="selectCustomOption('clientBrand','Brand Beta','Brand Beta')">Brand Beta</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Client Country <span class="info-dot" data-tip="The country where this campaign will primarily run.">i</span></label>
+          <div class="custom-select-wrap" id="wrap_clientCountry">
+            <button type="button" class="custom-select-trigger" onclick="toggleCustomSelect('clientCountry')">
+              <span class="custom-select-trigger-text" id="val_clientCountry">Client Country</span>
+              <span class="custom-select-chevron">▾</span>
+            </button>
+            <div class="custom-select-dropdown" id="dd_clientCountry">
+              <div class="custom-select-dropdown-inner">
+                <div class="custom-select-option" onclick="selectCustomOption('clientCountry','Client Country','Client Country')">Client Country</div>
+                <div class="custom-select-option" onclick="selectCustomOption('clientCountry','Canada','Canada')">Canada</div>
+                <div class="custom-select-option" onclick="selectCustomOption('clientCountry','United States','United States')">United States</div>
+                <div class="custom-select-option" onclick="selectCustomOption('clientCountry','United Kingdom','United Kingdom')">United Kingdom</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Languages <span class="info-dot" data-tip="Select the language(s) the campaign content will be delivered in.">i</span></label>
+          <div class="custom-select-wrap" id="wrap_languages">
+            <button type="button" class="custom-select-trigger" onclick="toggleCustomSelect('languages')">
+              <span class="custom-select-trigger-text" id="val_languages">Languages</span>
+              <span class="custom-select-chevron">▾</span>
+            </button>
+            <div class="custom-select-dropdown" id="dd_languages">
+              <div class="custom-select-dropdown-inner">
+                <div class="custom-select-option" onclick="selectCustomOption('languages','Languages','Languages')">Languages</div>
+                <div class="custom-select-option" onclick="selectCustomOption('languages','English','English')">English</div>
+                <div class="custom-select-option" onclick="selectCustomOption('languages','French','French')">French</div>
+                <div class="custom-select-option" onclick="selectCustomOption('languages','Spanish','Spanish')">Spanish</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Campaign Name <span class="info-dot" data-tip="Enter a unique name to identify this campaign.">i</span></label>
+          <input class="form-input" type="text" placeholder="Campaign Name"/>
+        </div>
+      </div>
+
+      <div class="date-retail-layout">
+        <!-- Left: Start Date + End Date stacked -->
+        <div class="date-retail-left">
+          <div class="form-group">
+            <label class="form-label">Start Date <span class="info-dot" data-tip="Enter the target start date for the campaign.">i</span></label>
+            <input class="form-input" type="date" value="2024-01-01"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Date <span class="info-dot" data-tip="Enter the target end date for the campaign.">i</span></label>
+            <input class="form-input" type="date" value="2024-12-31"/>
+          </div>
+        </div>
+
+        <!-- Vertical divider -->
+        <div class="date-retail-divider"></div>
+
+        <!-- Right: Retail Location Tracking + Select Retail Locations + tags -->
+        <div class="date-retail-right">
+          <div class="form-group">
+            <label class="form-label">Retail Location Tracking <span class="info-dot" data-tip="Enable to track which retailer(s) location are associated with this campaign.">i</span></label>
+            <div class="radio-group">
+              <label class="radio-label"><input type="radio" name="rlt" value="yes" id="rltYes" checked/> Yes</label>
+              <label class="radio-label"><input type="radio" name="rlt" value="no" id="rltNo"/> No</label>
+            </div>
+          </div>
+          <div class="form-group" id="locationSection">
+            <label class="form-label">Select Retail Locations</label>
+            <div class="location-dropdown-wrap" id="locationWrap">
+              <button type="button" class="location-trigger" id="locationTrigger" onclick="toggleLocationDD()">
+                <span class="location-trigger-text" id="locationTriggerText">Select Retail Locations</span>
+                <span class="location-trigger-chevron">▾</span>
+              </button>
+              <div class="location-dropdown hidden" id="locationDropdown">
+                <div class="location-dropdown-inner">
+                  <div class="location-dd-label">UK Grocery Retailers</div>
+                  <div class="location-dd-item" id="loc_tesco" onclick="toggleLocation('tesco','Tesco')">
+                    <input type="checkbox" id="cb_tesco"/> Tesco
+                  </div>
+                  <div class="location-dd-item" id="loc_sainsburys" onclick="toggleLocation('sainsburys','Sainsbury\'s')">
+                    <input type="checkbox" id="cb_sainsburys"/> Sainsbury's
+                  </div>
+                  <div class="location-dd-item" id="loc_asda" onclick="toggleLocation('asda','Asda')">
+                    <input type="checkbox" id="cb_asda"/> Asda
+                  </div>
+                  <hr class="location-dd-divider"/>
+                  <div class="location-dd-item" id="loc_custom_toggle" onclick="toggleCustomLocation()">
+                    <input type="checkbox" id="cb_custom_loc" style="visibility:hidden"/> + Add custom location
+                  </div>
+                  <div class="location-dd-custom-wrap hidden" id="customLocationWrap">
+                    <input class="location-dd-custom-input" id="customLocationInput" type="text" placeholder="Location name..." onclick="event.stopPropagation()"/>
+                    <button class="location-dd-custom-add" onclick="event.stopPropagation();addCustomLocation()">Add</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="location-tags hidden" id="locationTags"></div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider"/>
+
+      <!-- Code Details: title + two-column grid together so preview aligns with title -->
+      <div class="code-details-top">
+
+        <!-- Left: title + controls -->
+        <div class="code-details-left">
+          <div class="section-title" style="margin-top:0; margin-bottom:0">Code Details <span class="section-step">Step 2 of 4</span></div>
+
+          <div class="form-group">
+            <div class="per-asset-question">
+              Would you like One TapScan Code per program, or One TapScan Code per asset?
+              <span class="info-dot" data-tip="Choose whether one code covers the whole campaign, or each asset gets its own unique code.">i</span>
+            </div>
+            <div class="per-asset-radio-group">
+              <label class="per-asset-radio-label">
+                <input type="radio" name="codeScope" value="asset" checked/> One TapScan Code per asset
+              </label>
+              <label class="per-asset-radio-label">
+                <input type="radio" name="codeScope" value="program"/> One TapScan Code per program
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Standard or Custom TapScan Code <span class="info-dot" data-tip="Select a standard TapScan code, select an available custom code, or create a new custom code.">i</span></label>
+            <div class="custom-select-wrap" id="wrap_tapScan">
+              <button type="button" class="custom-select-trigger" onclick="toggleCustomSelect('tapScan')">
+                <span class="custom-select-trigger-text" id="val_tapScan">Standard</span>
+                <span class="custom-select-chevron">▾</span>
+              </button>
+              <div class="custom-select-dropdown" id="dd_tapScan">
+                <div class="custom-select-dropdown-inner">
+                  <div class="custom-select-option selected" onclick="selectCustomOption('tapScan','Standard','standard'); handleTapScanChange('standard')">Standard</div>
+                  <div class="custom-select-option" onclick="selectCustomOption('tapScan','Brand #1','brand1'); handleTapScanChange('brand1')">Brand #1</div>
+                  <div class="custom-select-option" onclick="selectCustomOption('tapScan','Brand #2','brand2'); handleTapScanChange('brand2')">Brand #2</div>
+                  <div class="custom-select-option" onclick="selectCustomOption('tapScan','Add New','addnew'); handleTapScanChange('addnew')">Add New</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+
+        </div>
+
+        <!-- Vertical divider -->
+        <div class="code-details-divider"></div>
+
+        <!-- Right: code preview panel -->
+        <div class="code-preview-panel">
+          <div class="code-preview-qr">
+            <svg width="65" height="65" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1"/>
+              <rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/>
+              <rect x="5" y="5" width="3" height="3" fill="currentColor" stroke="none"/>
+              <rect x="16" y="5" width="3" height="3" fill="currentColor" stroke="none"/>
+              <rect x="5" y="16" width="3" height="3" fill="currentColor" stroke="none"/>
+              <path d="M14 14h2v2h-2z M18 14h2v2h-2z M14 18h2v2h-2z M18 18h2v2h-2z"/>
+            </svg>
+          </div>
+          <div class="code-preview-label">Code Preview</div>
+        </div>
+
+      </div>
+
+      <!-- BOTTOM: Custom TapScan Code Editor — full width, shown only for Add New -->
+      <div class="code-editor-full hidden" id="codeEditorSection">
+        <div class="editor-box">
+          <div class="editor-title">Custom TapScan Code Editor</div>
+          <hr style="border:none;border-top:1.5px solid var(--border-lt);margin:0 0 18px"/>
+          <div class="form-group" style="margin-bottom:16px">
+            <label class="form-label">TapScan Code Name <span class="info-dot" data-tip="Give this custom TapScan code a name for easy identification later.">i</span></label>
+            <input class="form-input" type="text" placeholder="Code Name"/>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">TapScan Code Colour <span class="info-dot" data-tip="Set the primary colour of the TapScan code graphic.">i</span></label>
+              <div class="color-wrap">
+                <input type="text" value="#000000"/>
+                <div class="color-swatch"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="eye-label">
+                <input type="checkbox" id="eyeCheck"/> Custom Eye Colour
+                <span class="info-dot" style="background:var(--muted)" data-tip="Optionally set a separate colour for the eye elements of the TapScan code.">i</span>
+              </div>
+              <div class="color-wrap disabled" id="eyeColorWrap">
+                <input type="text" value="#000000" disabled/>
+                <div class="color-swatch grey"></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:16px">
+            <label class="form-label">Add Logo (PNG, JPG) <span class="info-dot" data-tip="Optionally upload a brand logo to be embedded in the centre of the TapScan code.">i</span></label>
+            <button class="upload-img-btn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+              Upload Image
+            </button>
+          </div>
+          <div class="save-tapscan-btn">
+            <button>Save TapScan Code</button>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider"/>
+      <div class="section-title">User Experience Details <span class="section-step">Step 3 of 4</span></div>
+
+      <div class="form-row">
+        <div class="form-group" style="align-items:flex-start">
+          <label class="form-label">Add a Landing Page Logo <span class="optional-text" style="font-weight:400">(Optional)</span> <span class="info-dot" data-tip="Upload a logo to display on the campaign landing page. Accepted formats: SVG, PNG, JPG.">i</span></label>
+          <button class="upload-asset-btn-inline" onclick="document.getElementById('landingLogoInput').click()">
+            Upload Logo File <span class="opt">(SVG, PNG, JPG)</span>
+          </button>
+          <input type="file" id="landingLogoInput" accept=".svg,image/png,image/jpeg" style="display:none" onchange="handleLandingLogo(this)"/>
+          <div class="file-tag hidden" id="landingLogoTag">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6976e7" stroke-width="2"><path d="M14,2H6A2,2,0,0,0,4,4V20A2,2,0,0,0,6,22H18A2,2,0,0,0,20,20V8Z"/><polyline points="14,2 14,8 20,8"/></svg>
+            <span id="landingLogoName"></span>
+            <button class="file-remove" onclick="removeLandingLogo()">Remove</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Scan Timer <span class="info-dot" data-tip="Enable if you want to have auto submission of the scan after a specified number of seconds.">i</span></label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="scan" value="yes" id="scanYes"/> Yes</label>
+            <label class="radio-label"><input type="radio" name="scan" value="no" id="scanNo" checked/> No</label>
+          </div>
+          <div id="scanSeconds" class="hidden">
+            <label class="form-label" style="margin-top:20px; margin-bottom:8px; display:flex">Select Timer Duration</label>
+            <div class="scan-seconds-wrap">
+              <input type="number" value="10" min="1"/>
+              <span class="scan-unit">Seconds</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider"/>
+      <div class="section-title">Asset Details <span class="section-step">Step 4 of 4</span></div>
+      <div class="asset-grid" id="assetGrid"></div>
+
+      <div class="form-group" style="margin-top:24px">
+        <label class="form-label">Will there be more than one asset type or quantity deployed at any single location? <span class="info-dot" data-tip="Select Yes if different display types or varying quantities of assets will be placed at the same retail location.">i</span></label>
+        <div class="radio-group" style="margin-top:4px">
+          <label class="radio-label"><input type="radio" name="multiAsset" value="yes" checked/> Yes</label>
+          <label class="radio-label"><input type="radio" name="multiAsset" value="no"/> No</label>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-close" onclick="document.getElementById('overlay').style.display='none'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Close
+      </button>
+      <button class="btn-preview">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        View Preview
+      </button>
+      <button class="btn-confirm">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20,6 9,17 4,12"/></svg>
+        Create Program
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ASSET_TYPES = [
+  { id:'endcap',   label:'Endcap Display' },
+  { id:'arch',     label:'Arch Display' },
+  { id:'fsu',      label:'FSU Display' },
+  { id:'sidewing', label:'Side Wing Display' },
+  { id:'pallet',   label:'Pallet Display' },
+  { id:'header',   label:'Header Display' },
+  { id:'custom',   label:'Custom / Other', isCustom:true }
+];
+
+let addedAssets=[], ddOpen=false, assetPhotos={}, showCustomInput=false, customInputVal='';
+let editingIdx=null, editSelected=null, editCustomVal='';
+
+function getDefaultAssetName(asset) {
+  const campaignInput = document.querySelector('input[placeholder="Campaign Name"]');
+  const campaignName = campaignInput && campaignInput.value.trim() ? campaignInput.value.trim() : 'CampaignName';
+  const year = new Date().getFullYear();
+  // Convert label to PascalCase with no spaces e.g. "Endcap Display" → "EndcapDisplay"
+  const typePart = asset.baseLabel.replace(/\s+(.)/g, (_, c) => c.toUpperCase()).replace(/\s/g, '');
+  return `${typePart}_${campaignName}_${year}`;
+}
+
+function getDisplayLabel(asset, allAssets) {
+  // Count how many assets share the same base type id
+  const sameType = allAssets.filter(a => a.typeId === asset.typeId);
+  if (sameType.length <= 1) return asset.baseLabel;
+  const num = sameType.findIndex(a => a.uid === asset.uid) + 1;
+  return `${asset.baseLabel} (${num})`;
+}
+
+function renderGrid() {
+  const grid = document.getElementById('assetGrid');
+  grid.innerHTML = '';
+
+  addedAssets.forEach((asset, idx) => {
+    const card = document.createElement('div');
+    card.className = 'asset-card';
+    const hasPhoto = assetPhotos[idx];
+    const displayLabel = getDisplayLabel(asset, addedAssets);
+    card.innerHTML = `
+      <div class="asset-card-header">
+        <div class="asset-card-title">${displayLabel}</div>
+        <button class="asset-delete" onclick="removeAsset(${idx})" title="Remove">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H6L5,6"/>
+            <path d="M10,11v6"/><path d="M14,11v6"/><path d="M9,6V4h6v2"/>
+          </svg>
+        </button>
+      </div>
+      <button class="asset-card-edit" onclick="openEditType(${idx})">Edit Display Type</button>
+      <hr class="asset-card-divider"/>
+      <div class="asset-field">
+        <label class="asset-label">Asset Name <span class="info-dot" data-tip="Input a descriptive name for this specific display asset.">i</span></label>
+        <input class="asset-input" type="text" value="${getDefaultAssetName(asset)}"/>
+      </div>
+      <div class="asset-field-row">
+        <div>
+          <label class="asset-label">Element # <span class="info-dot" data-tip="Include the HH Global Element Number associated with this asset.">i</span></label>
+          <input class="asset-input" type="text" placeholder="Element #"/>
+        </div>
+        <div>
+          <label class="asset-label">Market Quantity <span class="optional-text">(Opt)</span> <span class="info-dot" data-tip="Enter the quantity of units to be deployed in market.">i</span></label>
+          <input class="asset-input" type="number" placeholder="Market Quantity"/>
+        </div>
+      </div>
+      ${hasPhoto ? `
+        <div class="photo-preview"><img src="${hasPhoto}" alt="preview"/></div>
+        <div class="file-tag">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6976e7" stroke-width="2"><path d="M14,2H6A2,2,0,0,0,4,4V20A2,2,0,0,0,6,22H18A2,2,0,0,0,20,20V8Z"/><polyline points="14,2 14,8 20,8"/></svg>
+          <span>photonumberone.png</span>
+          <button class="file-remove" onclick="removePhoto(${idx})">Remove</button>
+        </div>` : ''}
+      <button class="upload-asset-btn" onclick="triggerUpload(${idx})">Upload Asset Visual <span class="opt">(Optional)</span></button>
+      <input type="file" id="fileInput${idx}" accept="image/*" style="display:none" onchange="handleFile(${idx},this)"/>
+    `;
+    grid.appendChild(card);
+  });
+
+  const addCell = document.createElement('div');
+  addCell.className = 'add-asset-cell';
+  addCell.id = 'addAssetCell';
+  addCell.onclick = toggleDD;
+  addCell.innerHTML = `
+    <div class="add-icon">+</div>
+    <div class="add-label">Add an Asset</div>
+    ${ddOpen ? `
+    <div class="asset-dropdown" id="assetDropdown" onclick="event.stopPropagation()">
+      <div class="asset-dropdown-inner">
+        <div class="asset-dd-label">Select a display type</div>
+        ${ASSET_TYPES.filter(t=>!t.isCustom).map(t=>`
+          <div class="asset-dd-item" onclick="event.stopPropagation();selectAndAdd('${t.id}','${t.label}')">${t.label}</div>`).join('')}
+        <hr class="asset-dd-divider"/>
+        <div class="asset-dd-item" onclick="event.stopPropagation();toggleCustomInput()">Custom / Other</div>
+        ${showCustomInput ? `
+        <div class="asset-dd-custom-wrap" onclick="event.stopPropagation()">
+          <input class="asset-dd-custom-input" id="customInput" type="text" placeholder="Enter display type name..." value="${customInputVal}" oninput="customInputVal=this.value"/>
+          <button class="asset-dd-custom-add" onclick="event.stopPropagation();addCustom()">Add</button>
+        </div>` : ''}
+      </div>
+    </div>` : ''}
+  `;
+  grid.appendChild(addCell);
+  if (ddOpen && showCustomInput) setTimeout(()=>{ const ci=document.getElementById('customInput'); if(ci) ci.focus(); },10);
+}
+
+function toggleDD(e) {
+  if (e.target.closest('.asset-dropdown')) return;
+  const campaignName = document.querySelector('input[placeholder="Campaign Name"]').value.trim();
+  if (!campaignName) {
+    showAssetError('Please enter a Campaign Name before adding an asset.');
+    return;
+  }
+  ddOpen=!ddOpen;
+  if(!ddOpen){showCustomInput=false;customInputVal='';}
+  renderGrid();
+}
+
+function showAssetError(msg) {
+  let err = document.getElementById('assetErrorMsg');
+  if (!err) {
+    err = document.createElement('div');
+    err.id = 'assetErrorMsg';
+    err.style.cssText = 'font-size:13px;color:#bf2540;margin-top:8px;font-family:Inter,sans-serif;font-weight:500;';
+    document.getElementById('assetGrid').after(err);
+  }
+  err.textContent = msg;
+  clearTimeout(err._timer);
+
+  // Highlight the campaign name input
+  const input = document.querySelector('input[placeholder="Campaign Name"]');
+  input.style.borderColor = '#bf2540';
+  input.style.boxShadow = '0 0 0 3px rgba(191,37,64,0.13)';
+  input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const clearHighlight = () => {
+    input.style.borderColor = '';
+    input.style.boxShadow = '';
+    input.removeEventListener('input', clearHighlight);
+  };
+  input.addEventListener('input', clearHighlight);
+
+  err._timer = setTimeout(() => {
+    err.textContent = '';
+    clearHighlight();
+  }, 3000);
+}
+function selectAndAdd(typeId, baseLabel) {
+  addedAssets.push({ uid: Date.now() + Math.random(), typeId, baseLabel });
+  ddOpen=false; showCustomInput=false; customInputVal=''; renderGrid();
+}
+function toggleCustomInput(){showCustomInput=!showCustomInput;renderGrid();}
+function addCustom(){
+  const name=customInputVal.trim(); if(!name)return;
+  addedAssets.push({ uid: Date.now() + Math.random(), typeId: 'custom_' + Date.now(), baseLabel: name, isCustom: true });
+  ddOpen=false; showCustomInput=false; customInputVal=''; renderGrid();
+}
+function removeAsset(idx){
+  addedAssets.splice(idx,1);
+  const np={};
+  Object.keys(assetPhotos).forEach(k=>{const ki=parseInt(k);if(ki<idx)np[ki]=assetPhotos[ki];else if(ki>idx)np[ki-1]=assetPhotos[ki];});
+  assetPhotos=np;renderGrid();
+}
+function triggerUpload(idx){const fi=document.getElementById('fileInput'+idx);if(fi)fi.click();}
+function handleFile(idx,input){
+  const file=input.files[0];if(!file)return;
+  const r=new FileReader();r.onload=e=>{assetPhotos[idx]=e.target.result;renderGrid();};r.readAsDataURL(file);
+}
+function removePhoto(idx){delete assetPhotos[idx];renderGrid();}
+
+function openEditType(idx){
+  editingIdx=idx;
+  const current=addedAssets[idx];
+  const match=ASSET_TYPES.find(t=>t.id===current.typeId);
+  editSelected=match?match.id:'custom';
+  editCustomVal=current.isCustom?current.baseLabel:'';
+  const overlay=document.createElement('div');
+  overlay.className='edit-type-overlay';overlay.id='editTypeOverlay';
+  overlay.onclick=function(e){if(e.target===this)closeEditType();};
+  overlay.innerHTML=`
+    <div class="edit-type-modal" onclick="event.stopPropagation()">
+      <div class="edit-type-title">Edit Display Type</div>
+      <div class="edit-type-list" id="editTypeList">
+        ${ASSET_TYPES.filter(t=>!t.isCustom).map(t=>`
+          <div class="edit-type-option${editSelected===t.id?' selected':''}" onclick="selectEditType('${t.id}')">
+            <input type="radio" name="editType" value="${t.id}" ${editSelected===t.id?'checked':''}/>${t.label}
+          </div>`).join('')}
+        <hr class="edit-type-divider"/>
+        <div class="edit-type-option${editSelected==='custom'?' selected':''}" onclick="selectEditType('custom')">
+          <input type="radio" name="editType" value="custom" ${editSelected==='custom'?'checked':''}/>Custom / Other
+        </div>
+        <div id="editCustomField" style="${editSelected==='custom'?'':'display:none'}">
+          <input class="edit-type-custom-input" id="editCustomInput" type="text" placeholder="Enter display type name..." value="${editCustomVal}" oninput="editCustomVal=this.value"/>
+        </div>
+      </div>
+      <div class="edit-type-actions">
+        <button class="edit-type-cancel" onclick="closeEditType()">Cancel</button>
+        <button class="edit-type-save" onclick="saveEditType()">Save</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+function selectEditType(id){
+  editSelected=id;
+  document.querySelectorAll('.edit-type-option').forEach(el=>{
+    const v=el.querySelector('input').value;
+    el.classList.toggle('selected',v===id);el.querySelector('input').checked=v===id;
+  });
+  const cf=document.getElementById('editCustomField');if(cf)cf.style.display=id==='custom'?'':'none';
+  if(id==='custom')setTimeout(()=>{const ci=document.getElementById('editCustomInput');if(ci)ci.focus();},10);
+}
+function saveEditType(){
+  if(editingIdx===null)return;
+  const uid=addedAssets[editingIdx].uid;
+  if(editSelected==='custom'){
+    const name=editCustomVal.trim();if(!name)return;
+    addedAssets[editingIdx]={uid, typeId:'custom_'+Date.now(), baseLabel:name, isCustom:true};
+  } else {
+    const type=ASSET_TYPES.find(t=>t.id===editSelected);
+    if(type) addedAssets[editingIdx]={uid, typeId:type.id, baseLabel:type.label};
+  }
+  closeEditType();renderGrid();
+}
+function closeEditType(){editingIdx=null;const el=document.getElementById('editTypeOverlay');if(el)el.remove();}
+
+// ── Retail Location multi-select ──
+const PRESET_LOCATIONS = [
+  { id:'tesco', label:'Tesco' },
+  { id:'sainsburys', label:"Sainsbury's" },
+  { id:'asda', label:'Asda' },
+];
+let selectedLocations = new Set();
+let customLocations = [];
+
+function toggleLocationDD() {
+  const dd = document.getElementById('locationDropdown');
+  const trigger = document.getElementById('locationTrigger');
+  dd.classList.toggle('hidden');
+  trigger.classList.toggle('open', !dd.classList.contains('hidden'));
+}
+
+function toggleLocation(id, label) {
+  const cb = document.getElementById('cb_' + id);
+  const item = document.getElementById('loc_' + id);
+  if (selectedLocations.has(id)) {
+    selectedLocations.delete(id);
+    cb.checked = false;
+    item.classList.remove('selected');
+  } else {
+    selectedLocations.add(id);
+    cb.checked = true;
+    item.classList.add('selected');
+  }
+  renderLocationTags();
+}
+
+function toggleCustomLocation() {
+  const wrap = document.getElementById('customLocationWrap');
+  wrap.classList.toggle('hidden');
+  if (!wrap.classList.contains('hidden')) {
+    document.getElementById('customLocationInput').focus();
+  }
+}
+
+function addCustomLocation() {
+  const input = document.getElementById('customLocationInput');
+  const name = input.value.trim();
+  if (!name) return;
+  const id = 'custom_loc_' + Date.now();
+  customLocations.push({ id, label: name });
+  selectedLocations.add(id);
+
+  // Add item to dropdown
+  const inner = document.querySelector('.location-dropdown-inner');
+  const toggleItem = document.getElementById('loc_custom_toggle');
+  const newItem = document.createElement('div');
+  newItem.className = 'location-dd-item selected';
+  newItem.id = 'loc_' + id;
+  newItem.onclick = function() { toggleLocation(id, name); };
+  newItem.innerHTML = `<input type="checkbox" id="cb_${id}" checked/> ${name}`;
+  inner.insertBefore(newItem, toggleItem);
+
+  input.value = '';
+  document.getElementById('customLocationWrap').classList.add('hidden');
+  renderLocationTags();
+}
+
+function removeLocation(id) {
+  selectedLocations.delete(id);
+  const cb = document.getElementById('cb_' + id);
+  const item = document.getElementById('loc_' + id);
+  if (cb) cb.checked = false;
+  if (item) item.classList.remove('selected');
+  renderLocationTags();
+}
+
+function renderLocationTags() {
+  const tagsEl = document.getElementById('locationTags');
+  const triggerText = document.getElementById('locationTriggerText');
+
+  // Collect all known locations
+  const allLocs = [
+    ...PRESET_LOCATIONS,
+    ...customLocations
+  ];
+
+  const selected = allLocs.filter(l => selectedLocations.has(l.id));
+
+  if (selected.length === 0) {
+    triggerText.textContent = 'Select Retail Locations';
+    triggerText.className = 'location-trigger-text';
+    tagsEl.classList.add('hidden');
+    tagsEl.innerHTML = '';
+  } else {
+    triggerText.textContent = selected.length === 1 ? selected[0].label : `${selected.length} retailers selected`;
+    triggerText.className = 'location-trigger-text has-value';
+    tagsEl.classList.remove('hidden');
+    tagsEl.innerHTML = selected.map(l =>
+      `<span class="location-tag">${l.label}<button class="location-tag-remove" onclick="removeLocation('${l.id}')" title="Remove">×</button></span>`
+    ).join('');
+  }
+}
+
+// Initialise preset checkboxes and tags on load
+function initLocations() {
+  PRESET_LOCATIONS.forEach(l => {
+    if (selectedLocations.has(l.id)) {
+      const cb = document.getElementById('cb_' + l.id);
+      const item = document.getElementById('loc_' + l.id);
+      if (cb) cb.checked = true;
+      if (item) item.classList.add('selected');
+    }
+  });
+  renderLocationTags();
+}
+
+// Show/hide location section based on Retail Location Tracking radio
+document.getElementById('rltYes').addEventListener('change', function() {
+  document.getElementById('locationSection').classList.toggle('hidden', !this.checked);
+});
+document.getElementById('rltNo').addEventListener('change', function() {
+  document.getElementById('locationSection').classList.add('hidden');
+  document.getElementById('locationDropdown').classList.add('hidden');
+  document.getElementById('locationTrigger').classList.remove('open');
+});
+
+// ── Info dot click to lock tooltip ──
+document.addEventListener('mousedown', function(e) {
+  const dot = e.target.closest('.info-dot');
+  if (dot) {
+    e.preventDefault();
+    e.stopPropagation();
+    const isActive = dot.classList.contains('active');
+    document.querySelectorAll('.info-dot.active').forEach(el => el.classList.remove('active'));
+    if (!isActive) dot.classList.add('active');
+  } else {
+    document.querySelectorAll('.info-dot.active').forEach(el => el.classList.remove('active'));
+  }
+});
+
+function handleLandingLogo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('landingLogoName').textContent = file.name;
+  document.getElementById('landingLogoTag').classList.remove('hidden');
+}
+function removeLandingLogo() {
+  document.getElementById('landingLogoInput').value = '';
+  document.getElementById('landingLogoTag').classList.add('hidden');
+  document.getElementById('landingLogoName').textContent = '';
+}
+
+// ── Custom select dropdowns ──
+function toggleCustomSelect(id) {
+  const dd = document.getElementById('dd_' + id);
+  const trigger = dd.previousElementSibling;
+  const isOpen = dd.classList.contains('open');
+  // Close all open dropdowns first
+  document.querySelectorAll('.custom-select-dropdown.open').forEach(el => {
+    el.classList.remove('open');
+    el.previousElementSibling.classList.remove('open');
+  });
+  if (!isOpen) {
+    dd.classList.add('open');
+    trigger.classList.add('open');
+  }
+}
+
+function selectCustomOption(id, label, value) {
+  document.getElementById('val_' + id).textContent = label;
+  // Update selected state
+  const dd = document.getElementById('dd_' + id);
+  dd.querySelectorAll('.custom-select-option').forEach(opt => {
+    opt.classList.toggle('selected', opt.textContent.trim() === label);
+  });
+  dd.classList.remove('open');
+  dd.previousElementSibling.classList.remove('open');
+}
+
+function handleTapScanChange(val) {
+  document.getElementById('codeEditorSection').classList.toggle('hidden', val !== 'addnew');
+}
+
+// Close custom dropdowns on outside click
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.custom-select-wrap')) {
+    document.querySelectorAll('.custom-select-dropdown.open').forEach(el => {
+      el.classList.remove('open');
+      el.previousElementSibling.classList.remove('open');
+    });
+  }
+  // existing location dropdown close
+  const wrap = document.getElementById('locationWrap');
+  const dd = document.getElementById('locationDropdown');
+  if (wrap && dd && !wrap.contains(e.target)) {
+    dd.classList.add('hidden');
+    document.getElementById('locationTrigger').classList.remove('open');
+  }
+  // Close asset dropdown on outside click
+  if (ddOpen && !e.target.closest('#addAssetCell')) {
+    ddOpen = false; showCustomInput = false; customInputVal = ''; renderGrid();
+  }
+});
+
+// ── Scan timer ──
+document.getElementById('scanYes').addEventListener('change', function() {
+  document.getElementById('scanSeconds').classList.toggle('hidden', !this.checked);
+});
+document.getElementById('scanNo').addEventListener('change', function() {
+  document.getElementById('scanSeconds').classList.add('hidden');
+});
+
+// ── Eye colour ──
+document.getElementById('eyeCheck').addEventListener('change', function() {
+  const wrap = document.getElementById('eyeColorWrap');
+  wrap.classList.toggle('disabled', !this.checked);
+  wrap.querySelector('input').disabled = !this.checked;
+});
+
+// ── Close button only ──
+
+initLocations();
+renderGrid();
+</script>
+</body>
+</html>
